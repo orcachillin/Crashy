@@ -23,6 +23,8 @@ buildscript {
         classpath(libs.ssh)
         classpath(libs.brotli)
         classpath("com.aayushatharva.brotli4j:native-windows-x86_64:${libs.versions.brotli.get()}")
+        // compressClient runs in the build script, so the build machine needs its own native.
+        classpath("com.aayushatharva.brotli4j:native-linux-x86_64:${libs.versions.brotli.get()}")
     }
 }
 plugins {
@@ -79,13 +81,15 @@ dependencies {
     // Use the linux natives when packaging because we run the server on a linux EC2 instance
     linuxOnly("com.aayushatharva.brotli4j:native-linux-x86_64:$brotliVersion")
     linuxOnly(objectboxLinuxNatives)
-    implementation("io.github.natanfudge:loggy:0.3.5")
+    // io.github.natanfudge:loggy is replaced by a local stand-in, see io/github/natanfudge/logs.
 }
 
 
 val clientDir = projectDir.parentFile.resolve("client")
 node {
     nodeProjectDir.set(clientDir)
+    // The build image installs Node itself; the plugin should not fetch its own copy.
+    download.set(false)
 }
 
 

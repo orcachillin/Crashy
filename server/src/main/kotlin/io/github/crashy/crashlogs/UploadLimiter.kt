@@ -36,7 +36,8 @@ class UploadLimiter {
      */
     context(LogContext)
     fun requestUpload(ip: String, size: Int, firebasePass: String?): Boolean {
-        val fromFirebase = getResource("/secrets/firebase_pass.txt")!! == firebasePass
+        // Missing secret means nobody arrives through the retired firebase function.
+        val fromFirebase = getResource("/secrets/firebase_pass.txt")?.let { it == firebasePass } ?: false
         logData("Rerouted from firebase") { fromFirebase }
         // Don't test against any upload limit if from firebase
         if (fromFirebase) return true

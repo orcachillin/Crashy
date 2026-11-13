@@ -71,6 +71,13 @@ fun randomString(length: Int) = buildString {
 fun getResource(path: String): String? =
     Crashy::class.java.getResourceAsStream(path)?.readBytes()?.toString(Charset.defaultCharset())
 
+/**
+ * Reads a bundled secret, falling back to an environment variable.
+ * The original server kept these in a gitignored resources folder; self-hosted deployments set them via env instead.
+ */
+fun configValue(resourcePath: String, envVar: String): String? =
+    getResource(resourcePath) ?: System.getenv(envVar)
+
 //
 
 suspend fun <T> CompletableFuture<T>.suspendResult(): Result<T> = suspendCancellableCoroutine { cont ->

@@ -1,6 +1,7 @@
 package io.github.crashy
 
 import io.github.crashy.Crashy.Build.*
+import io.github.crashy.utils.configValue
 import io.github.crashy.utils.getResource
 import io.github.natanfudge.logs.Loggy
 import io.github.natanfudge.logs.impl.LoggingCredentials
@@ -67,7 +68,7 @@ private val loggerInit = Loggy.create(
     logToConsole = true,
     logsDir = Crashy.HomeDir.resolve("logs"),
     credentials = LoggingCredentials(
-        username = getResource("/secrets/admin_user.txt")!!.toCharArray(),
-        password = getResource("/secrets/admin_pass.txt")!!.toCharArray()
+        username = configValue("/secrets/admin_user.txt", "CRASHY_ADMIN_USER")!!.toCharArray(),
+        password = configValue("/secrets/admin_pass.txt", "CRASHY_ADMIN_PASS")!!.toCharArray()
     )
 )

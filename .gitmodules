@@ -1,3 +1,0 @@
-[submodule "client/src/fudge-lib"]
-	path = client/src/fudge-lib
-	url = https://github.com/Caesarea-Labs/fudge-lib

@@ -5,11 +5,15 @@ import io.github.crashy.crashlogs.*
 import io.github.crashy.utils.*
 import io.github.natanfudge.logs.LogContext
 import kotlinx.serialization.ExperimentalSerializationApi
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3AsyncClient
+import software.amazon.awssdk.services.s3.S3Configuration
 import software.amazon.awssdk.services.s3.model.S3Exception
 import software.amazon.awssdk.services.s3.model.Tier
+import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 
@@ -22,9 +26,23 @@ class CrashlogStorage(
 ) : AutoCloseable {
     private val s3 = S3AsyncClient.builder()
         .apply {
-            if (Crashy.isLocal()) credentialsProvider(ProfileCredentialsProvider.create("personal"))
+            // A custom endpoint (MinIO/Ceph) also needs path-style addressing to resolve buckets.
+            val endpoint = System.getenv("CRASHY_S3_ENDPOINT")
+            if (endpoint != null) {
+                endpointOverride(URI.create(endpoint))
+                serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+            }
+            val accessKey = System.getenv("CRASHY_S3_ACCESS_KEY")
+            val secretKey = System.getenv("CRASHY_S3_SECRET_KEY")
+            if (accessKey != null && secretKey != null) {
+                credentialsProvider(
+                    StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey))
+                )
+            } else if (Crashy.isLocal()) {
+                credentialsProvider(ProfileCredentialsProvider.create("personal"))
+            }
         }
-        .region(Region.EU_CENTRAL_1)
+        .region(Region.of(System.getenv("CRASHY_S3_REGION") ?: "eu-central-1"))
         .build()
     private val cache = CrashlogCache(parentDir = appDataDir.resolve("cache").createDirectories(), clock)
 

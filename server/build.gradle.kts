@@ -197,6 +197,15 @@ tasks {
         from("beta.txt")
     }
 
+    /**
+     * Linux jar with no release/beta marker, so the server starts in Local mode:
+     * plain HTTP on port 80, no HttpsRedirect, TLS terminated by a reverse proxy instead.
+     */
+    val selfhostJar by registering(ShadowJar::class) {
+        configureLinuxJarTask()
+        archiveClassifier.set("selfhost")
+    }
+
     fun windowsLocalJarTask(classifier: String, additionalConfig: ShadowJar.() -> Unit = {}) = registering(ShadowJar::class) {
         archiveClassifier.set(classifier)
         from(sourceSets.main.get().output)

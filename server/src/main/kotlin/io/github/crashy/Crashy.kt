@@ -32,6 +32,13 @@ object Crashy {
         SecondLocal -> "localhost:4433"
     }
 
+    /**
+     * Public base URL that uploaded crash links point at. Self-hosted deployments set it through
+     * CRASHY_PUBLIC_URL; otherwise it follows the build's own domain.
+     */
+    val publicUrl: String = System.getenv("CRASHY_PUBLIC_URL")
+        ?: "${if (isLocal()) "http" else "https"}://$domain"
+
     private fun readBuild(): Build {
         // Release: we have a release.txt file
         val releaseFile = Crashy::class.java.getResource("/release.txt")

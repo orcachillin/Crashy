@@ -47,12 +47,11 @@ class CrashlogApi(private val logs: CrashlogStorage) {
         return UploadCrashResponse.Success(
             id,
             deletionKey = key,
-            crashyUrl = "$httpPrefix://${Crashy.domain}/${id.value}?code=${key}"
+            crashyUrl = "${Crashy.publicUrl}/${id.value}?code=${key}"
         )
 
     }
 
-    private val httpPrefix = if (Crashy.isLocal()) "http" else "https"
 
     context(LogContext)
     suspend fun getCrash(id: String): Response {
@@ -117,7 +116,7 @@ class CrashlogApi(private val logs: CrashlogStorage) {
     }
 
     private val landingPage = htmlTemplate.replaceSequentially(
-        listOf("{PREFETCH}" to "", "{DESCRIPTION}" to "Format and remap Minecraft crash reports", "{TITLE}" to if(Crashy.isRelease()) "Crashy" else "Crashy Beta")
+        listOf("{PREFETCH}" to "", "{DESCRIPTION}" to "Format and remap Minecraft crash reports", "{TITLE}" to if(Crashy.isSecondaryInstance()) "Crashy Beta" else "Crashy")
     )
 
     fun getLandingPage(): Response {
